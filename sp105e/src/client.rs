@@ -1,22 +1,19 @@
-use std::{future::Future, str::FromStr};
+use std::str::FromStr;
 
 use anyhow::{anyhow, Result};
-use bluer::gatt::*;
-use bluer::*;
+use bluer::{gatt::remote::Characteristic, Address, Device, Session, Uuid};
 
-use crate::commands::{GATT_CHARACTERISTIC_UUID, GATT_SERVICE_UUID};
+use crate::commands::{Command, GATT_CHARACTERISTIC_UUID, GATT_SERVICE_UUID};
 
 pub struct LEDClient {
-    device: bluer::Device,
-    characteristic: bluer::gatt::remote::Characteristic,
+    device: Device,
+    characteristic: Characteristic,
 }
 
 impl LEDClient {
-    async fn find_led_characteristic(
-        device: &bluer::Device,
-    ) -> Result<bluer::gatt::remote::Characteristic> {
-        let w_ser_uuid = bluer::Uuid::from_str(GATT_SERVICE_UUID)?;
-        let w_chr_uuid = bluer::Uuid::from_str(GATT_CHARACTERISTIC_UUID)?;
+    async fn find_led_characteristic(device: &Device) -> Result<Characteristic> {
+        let w_ser_uuid = Uuid::from_str(GATT_SERVICE_UUID)?;
+        let w_chr_uuid = Uuid::from_str(GATT_CHARACTERISTIC_UUID)?;
 
         for service in device.services().await? {
             let uuid = service.uuid().await?;
@@ -43,7 +40,7 @@ impl LEDClient {
         return Err(anyhow! {"device does not have the required gatt service/characteristic"});
     }
 
-    async fn ensure_device_connected(device: &bluer::Device) -> Result<()> {
+    async fn ensure_device_connected(device: &Device) -> Result<()> {
         if !device.is_connected().await? {
             let mut retry = 3;
             loop {
@@ -70,7 +67,7 @@ impl LEDClient {
     }
 
     pub async fn new(adapter_name: Option<String>, target_mac: String) -> Result<Self> {
-        let session = bluer::Session::new().await?;
+        let session = Session::new().await?;
         let adapter = match adapter_name {
             Some(name) => session.adapter(name.as_str())?,
             None => session.default_adapter().await?,
@@ -91,7 +88,7 @@ impl LEDClient {
         })
     }
 
-    pub async fn send_cmd(&self, command: &crate::commands::Command) -> Result<()> {
+    pub async fn send_cmd(&self, command: &Command) -> Result<()> {
         self.ensure_connected().await?;
         self.characteristic.write(&command.buf()).await?;
 
@@ -116,7 +113,6 @@ mod tests {
     use std::{cmp::min, time::Duration};
 
     use super::*;
-    use crate::commands::Command;
 
     // Change this mac to test with your own device
     static TEST_MAC: &str = "69:96:06:04:0C:B1";
