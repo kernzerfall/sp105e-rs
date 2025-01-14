@@ -30,6 +30,10 @@ pub enum Command {
     /// Structure: <PRE> <CO> 0 0 <SUF>
     SetColorOrder(ColorOrder) = 0x3C,
 
+    /// Sets the pixel type
+    /// Structure: <PRE> <PT> 0 0 <SUF>
+    SetPixelType(PixelType) = 0x1C,
+
     // This group sets a fixed color mode (for some reason this is distinct
     // from setting a fixed color in the custom RGB command).
     // Structure: <PRE> 0 0 0 <SUF>, the suffix is determined by the color.
@@ -78,6 +82,39 @@ pub enum ColorOrder {
     BGR,
 }
 
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
+#[repr(u8)]
+pub enum PixelType {
+    SM16703,
+    TM1804,
+    USC1903,
+    WS2811,
+    WS2801,
+    SK6812,
+    SK6812RGBW,
+    LPD6803,
+    LPD8806,
+    #[default]
+    APA102,
+    APA105,
+    TM1814,
+    TM1914,
+    TM1913,
+    P9813,
+    INK1003,
+    DMX512,
+    P943S,
+    P9411,
+    P9412,
+    P9413,
+    P9414,
+    TX1812,
+    TX1813,
+    GS8206,
+    GS8208,
+    SK9822,
+}
+
 impl Command {
     fn discriminant(&self) -> u8 {
         // SAFETY: Because `Self` is marked `repr(u8)`, its layout is a `repr(C)` `union`
@@ -99,6 +136,7 @@ impl Command {
             Command::Color(colors) => *colors,
 
             Command::SetColorOrder(co) => [co.clone() as u8, 0, 0],
+            Command::SetPixelType(pt) => [pt.clone() as u8, 0, 0],
 
             // For commands that don't need inner bytes
             _ => [0, 0, 0],
