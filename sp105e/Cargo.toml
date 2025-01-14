@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.95"
 bluer = { version = "0.17.3", features = ["full"] }
 serde = { version = "1.0.217", features = ["derive"] }
+tokio = "1.43.0"
