@@ -27,6 +27,7 @@ pub enum Command {
     SetPixels(u16) = 0x2D,
 
     /// Sets the order of the colors
+    /// Structure: <PRE> <CO> 0 0 <SUF>
     SetColorOrder(ColorOrder) = 0x3C,
 
     // This group sets a fixed color mode (for some reason this is distinct
