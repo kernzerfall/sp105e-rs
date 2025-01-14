@@ -132,10 +132,12 @@ impl Command {
                 [hi, lo, 0]
             }
 
-            // TODO: take the controller's mode into consideration?
             Command::Color(colors) => *colors,
 
+            // TODO: check value
             Command::SetColorOrder(co) => [co.clone() as u8, 0, 0],
+
+            // TODO: check value
             Command::SetPixelType(pt) => [pt.clone() as u8, 0, 0],
 
             // For commands that don't need inner bytes
