@@ -119,14 +119,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn static_cmd_test() {
+    fn static_cmd() {
         assert_eq!(Command::Power.buf(), [COMMAND_PREFIX, 0, 0, 0, 0xAA]);
         assert_eq!(Command::FixedRed.buf(), [COMMAND_PREFIX, 0, 0, 0, 0x36]);
         assert_eq!(Command::SpeedUp.buf(), [COMMAND_PREFIX, 0, 0, 0, 0x03]);
     }
 
     #[test]
-    fn dynamic_color_test() {
+    fn dynamic_color() {
         let rgb = [0x12, 0x34, 0x56];
         let result = Command::Color(rgb.clone()).buf();
 
@@ -134,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn dynamic_led_num_test() {
+    fn dynamic_led_num() {
         let leds: u16 = 0x1234;
 
         let leds_hi = (leds >> 8) as u8;
@@ -146,7 +146,7 @@ mod tests {
     }
 
     #[test]
-    fn dynamic_order_test() {
+    fn dynamic_order() {
         let order = ColorOrder::GRB;
         let ordinal = 2;
 
