@@ -1,6 +1,9 @@
 const COMMAND_BUF_LENGTH: usize = 5;
 const COMMAND_PREFIX: u8 = 0x38;
 
+pub(crate) const GATT_SERVICE_UUID: &str = "0000ffe0-0000-1000-8000-00805f9b34fb";
+pub(crate) const GATT_CHARACTERISTIC_UUID: &str = "0000ffe1-0000-1000-8000-00805f9b34fb";
+
 /// Commands which appear as suffixes in the buffer (<SUF>)
 #[derive(PartialEq, Eq, Debug)]
 #[repr(u8)]
