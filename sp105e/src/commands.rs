@@ -134,6 +134,8 @@ impl Command {
 
             Command::Color(colors) => *colors,
 
+            Command::Animation(animation) => [*animation, 0, 0],
+
             // TODO: check value
             Command::SetColorOrder(co) => [co.clone() as u8, 0, 0],
 
