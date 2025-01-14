@@ -97,6 +97,18 @@ impl LEDClient {
 
         Ok(())
     }
+
+    pub async fn send_cmd_with_callback(
+        &self,
+        command: &Command,
+    ) -> Result<impl futures_core::stream::Stream<Item = Vec<u8>>> {
+        self.ensure_connected().await?;
+
+        let ind = self.characteristic.notify().await?;
+        self.characteristic.write(&command.buf()).await?;
+
+        Ok(ind)
+    }
 }
 
 #[cfg(test)]
