@@ -1,5 +1,5 @@
 const COMMAND_BUF_LENGTH: usize = 5;
-const COMMAND_PREFIX: u8 = 0x3B;
+const COMMAND_PREFIX: u8 = 0x38;
 
 /// Commands which appear as suffixes in the buffer (<SUF>)
 #[derive(PartialEq, Eq, Debug)]
