@@ -5,7 +5,7 @@ pub(crate) const GATT_SERVICE_UUID: &str = "0000ffe0-0000-1000-8000-00805f9b34fb
 pub(crate) const GATT_CHARACTERISTIC_UUID: &str = "0000ffe1-0000-1000-8000-00805f9b34fb";
 
 /// Commands which appear as suffixes in the buffer (<SUF>)
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 #[repr(u8)]
 pub enum Command {
     /// Hello
@@ -70,7 +70,7 @@ pub enum Command {
     BrightnessDown = 0x28,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Default)]
+#[derive(PartialEq, Eq, Debug, Clone, Default, clap::ValueEnum)]
 #[repr(u8)]
 pub enum ColorOrder {
     #[default]
@@ -82,7 +82,7 @@ pub enum ColorOrder {
     BGR,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Default)]
+#[derive(PartialEq, Eq, Debug, Clone, Default, clap::ValueEnum)]
 #[repr(u8)]
 pub enum PixelType {
     SM16703,

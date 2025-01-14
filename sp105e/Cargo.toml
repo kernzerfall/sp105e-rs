@@ -3,9 +3,18 @@ name = "sp105e"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "sp105e"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ctrl"
+path = "src/ctrl.rs"
+
 [dependencies]
 anyhow = "1.0.95"
 bluer = { version = "0.17.3", features = ["full"] }
+clap = { version = "4.5.26", features = ["derive"] }
 futures-core = "0.3.31"
 serde = { version = "1.0.217", features = ["derive"] }
-tokio = "1.43.0"
+tokio = { version = "1.43.0", features = ["rt-multi-thread"] }
