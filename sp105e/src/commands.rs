@@ -8,6 +8,16 @@ pub(crate) const GATT_CHARACTERISTIC_UUID: &str = "0000ffe1-0000-1000-8000-00805
 #[derive(PartialEq, Eq, Debug)]
 #[repr(u8)]
 pub enum Command {
+    /// Hello
+    /// Structure: <PRE> 0 0 0 <SUF>
+    /// Controller notifies "00 01 02 03 04 05 06 bf" back if OK
+    Hello = 0xD5,
+
+    /// Config
+    /// Structure <PRE> 0 0 0 <SUF>
+    /// Controller notifies back its status (can't decode it yet!)
+    Status = 0x10,
+
     /// Toggles power
     /// Structure: <PRE> 0 0 0 <SUF>
     Power = 0xAA,
