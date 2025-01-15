@@ -38,11 +38,11 @@ pub enum Command {
     // from setting a fixed color in the custom RGB command).
     // Structure: <PRE> 0 0 0 <SUF>, the suffix is determined by the color.
     /// Fixed color mode red
-    FixedRed = 0x36,
+    FixedRed = 0x12,
     /// Fixed color mode green
     FixedGreen = 0x18,
     /// Fixed color mode blue
-    FixedBlue = 0x12,
+    FixedBlue = 0x36,
     /// Fixed color mode white1
     FixedWhite1 = 0x3B,
     /// Fixed color mode white2
