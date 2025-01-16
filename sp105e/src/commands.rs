@@ -60,8 +60,8 @@ pub enum Command {
     Animation(u8) = 0x2C,
 
     /// Sets a custom RGB color
-    /// Structure: <PRE> <C1> <C2> <C3> <SUF>
-    /// The color order is determined by the mode (RGB, BGR, ...)
+    /// Structure: <PRE> <R> <G> <B> <SUF>
+    /// The color order is always rgb
     Color([u8; 3]) = 0x1E,
 
     /// Adjusts the speed upwards by one step
