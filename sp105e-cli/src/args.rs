@@ -11,6 +11,7 @@ pub(super) enum CliCommand {
     SetAnimation { id: u8 },
     Speed { up: u8 },
     Brightness { up: u8 },
+    GetState,
 }
 
 #[derive(Clone, Debug, ValueEnum)]

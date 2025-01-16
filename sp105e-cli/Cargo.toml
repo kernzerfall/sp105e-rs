@@ -7,5 +7,4 @@ edition = "2021"
 sp105e = { path = "../sp105e", features = [ "client", "clap" ]}
 anyhow = "1.0.95"
 clap = { version = "4.5.26", features = ["derive"] }
-futures-core = "0.3.31"
 tokio = { version = "1.43.0", features = ["rt-multi-thread"] }

@@ -1,10 +1,40 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 
 use args::{CliCommand, FixedColor};
 use clap::Parser;
-use sp105e::{client::LEDClient, commands::Command};
+use sp105e::{
+    client::LEDClient,
+    commands::{Command, StatusResp},
+};
 
 mod args;
+
+async fn pretty_print_status(status: &StatusResp) -> Result<()> {
+    println!("Power      : {:#04x}", status.power);
+    println!(
+        "Mode       : {:#04x} ({:?})",
+        status.mode.discriminant(),
+        status.mode
+    );
+    println!("Speed      : {:#04x}", status.speed);
+    println!("Brightness : {:#04x}", status.brightness);
+    println!(
+        "PixelType  : {:#04x} ({:?})",
+        status.pixel_type.clone() as u8,
+        status.pixel_type
+    );
+    println!(
+        "ColorOrder : {:#04x} ({:?})",
+        status.color_order.clone() as u8,
+        status.color_order
+    );
+    println!(
+        "Unknown    : {:#04x} {:#04x}",
+        status._unknown[0], status._unknown[1]
+    );
+
+    Ok(())
+}
 
 #[tokio::main]
 pub async fn main() -> Result<()> {
@@ -38,8 +68,16 @@ pub async fn main() -> Result<()> {
                 Command::BrightnessDown
             }
         }
+        CliCommand::GetState => Command::Status,
     };
 
-    client.send_cmd(&command).await?;
+    match command {
+        Command::Status => {
+            let status = client.get_status().await?;
+            pretty_print_status(&status).await?;
+        }
+        c => client.send_cmd(&c).await?,
+    }
+
     Ok(())
 }
