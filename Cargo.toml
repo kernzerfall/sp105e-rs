@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "sp105e",
+  "sp105-cli",
+]
