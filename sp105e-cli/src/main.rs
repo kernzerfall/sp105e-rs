@@ -68,7 +68,7 @@ pub async fn main() -> Result<()> {
                 Command::BrightnessDown
             }
         }
-        CliCommand::GetState => Command::Status,
+        CliCommand::Status => Command::Status,
     };
 
     match command {
