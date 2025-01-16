@@ -2,5 +2,5 @@
 
 members = [
   "sp105e",
-  "sp105-cli",
+  "sp105e-cli",
 ]
