@@ -90,7 +90,7 @@ impl LEDClient {
 
     pub async fn send_cmd(&self, command: &Command) -> Result<()> {
         self.ensure_connected().await?;
-        self.characteristic.write(&command.buf()).await?;
+        self.characteristic.write(&*command.buf()).await?;
 
         Ok(())
     }
@@ -102,7 +102,7 @@ impl LEDClient {
         self.ensure_connected().await?;
 
         let ind = self.characteristic.notify().await?;
-        self.characteristic.write(&command.buf()).await?;
+        self.characteristic.write(&*command.buf()).await?;
 
         Ok(ind)
     }

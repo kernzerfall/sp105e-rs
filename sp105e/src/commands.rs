@@ -1,6 +1,9 @@
 const COMMAND_BUF_LENGTH: usize = 5;
 const COMMAND_PREFIX: u8 = 0x38;
 
+// The status command (0x10) returns 8 bytes via a notification
+pub const STATUS_RETURN_LENGTH: u8 = 8;
+
 pub const GATT_SERVICE_UUID: &str = "0000ffe0-0000-1000-8000-00805f9b34fb";
 pub const GATT_CHARACTERISTIC_UUID: &str = "0000ffe1-0000-1000-8000-00805f9b34fb";
 
@@ -125,7 +128,8 @@ impl Command {
         unsafe { *<*const _>::from(self).cast::<u8>() }
     }
 
-    pub fn buf(&self) -> [u8; COMMAND_BUF_LENGTH] {
+    #[no_mangle]
+    pub extern "C" fn buf(&self) -> Box<[u8; COMMAND_BUF_LENGTH]> {
         let inner_bytes = match self {
             Command::SetPixels(pixels) => {
                 let hi = (pixels >> 8) as u8;
@@ -148,13 +152,13 @@ impl Command {
             _ => [0, 0, 0],
         };
 
-        [
+        Box::new([
             COMMAND_PREFIX,
             inner_bytes[0],
             inner_bytes[1],
             inner_bytes[2],
             self.discriminant(),
-        ]
+        ])
     }
 }
 
