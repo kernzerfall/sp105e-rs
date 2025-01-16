@@ -16,4 +16,5 @@ anyhow = "1.0.95"
 bluer = { version = "0.17.3", features = ["full"] }
 clap = { version = "4.5.26", features = ["derive"] }
 futures-core = "0.3.31"
+futures-util = "0.3.31"
 tokio = { version = "1.43.0" }

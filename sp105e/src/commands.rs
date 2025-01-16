@@ -1,5 +1,9 @@
-const COMMAND_BUF_LENGTH: usize = 5;
-const COMMAND_PREFIX: u8 = 0x38;
+use std::mem::transmute;
+
+use anyhow::{anyhow, Result};
+
+pub const COMMAND_BUF_LENGTH: usize = 5;
+pub const COMMAND_PREFIX: u8 = 0x38;
 
 // The status command (0x10) returns 8 bytes via a notification
 pub const STATUS_RETURN_LENGTH: u8 = 8;
@@ -18,7 +22,7 @@ pub enum Command {
 
     /// Config
     /// Structure <PRE> 0 0 0 <SUF>
-    /// Controller notifies back its status (can't decode it yet!)
+    /// Controller notifies back its status (can't decode it fully yet!)
     Status = 0x10,
 
     /// Toggles power
@@ -120,8 +124,102 @@ pub enum PixelType {
     SK9822,
 }
 
+/// Struct representation of the bytes returned by the status command
+/// The order of the `u8`s in the struct corresponds directly to the
+/// bytes.
+#[derive(PartialEq, Eq, Debug, Clone)]
+#[repr(C)]
+pub struct StatusResp {
+    /// Power state of the strip (0=off, 1=on)
+    pub power: u8,
+
+    /// Current mode of the controller
+    /// - [00-c8]    => animation
+    /// - c9         => custom color (no indication as to _what_ color!)
+    /// - ca, cb, cc => red, green, blue (FixedColor)
+    /// - cd, ce     => white1, white2
+    pub mode: Command,
+
+    /// Speed of the animation. Is also set on non-animation modes.
+    /// Range: [0, 6]
+    pub speed: u8,
+
+    /// Brightness
+    /// Range: [0, 6]
+    pub brightness: u8,
+
+    /// Pixel type
+    /// Range: see `enum PixelType`
+    pub pixel_type: PixelType,
+
+    /// Color order
+    /// Range: see `enum ColorOrder`
+    pub color_order: ColorOrder,
+
+    /// Rest bytes in status message (function unknown)
+    /// Always seem to be 0x01 0xf4 (maybe some controller ID?)
+    pub _unknown: [u8; 2],
+}
+
+impl TryFrom<Vec<u8>> for StatusResp {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        if value.len() < 8 {
+            return Err(anyhow!("status vector has wrong size"));
+        }
+
+        let [power, mode_v, speed, brightness, pixel_type_v, color_order_v, u1, u2]: [u8] =
+            value[..]
+        else {
+            return Err(anyhow!("could not unpack status vector!"));
+        };
+
+        // interpret *_v into their enum variants
+        let mode = if mode_v <= 0xc8 {
+            Command::Animation(mode_v)
+        } else {
+            match mode_v {
+                0xc9 => Command::Color([0, 0, 0]),
+                0xca => Command::FixedRed,
+                0xcb => Command::FixedGreen,
+                0xcc => Command::FixedBlue,
+                0xcd => Command::FixedWhite1,
+                0xce => Command::FixedWhite2,
+                _ => return Err(anyhow!("unknown mode {mode_v}")),
+            }
+        };
+
+        if !(0..=PixelType::SK9822 as u8).contains(&pixel_type_v) {
+            return Err(anyhow!("pixel type {pixel_type_v} is not known"));
+        }
+
+        // SAFETY: we have already checked that the enum has this value!
+        let pixel_type: PixelType = unsafe { transmute(pixel_type_v) };
+
+        if !(0..=ColorOrder::BGR as u8).contains(&color_order_v) {
+            return Err(anyhow!("pixel type {color_order_v} is not known"));
+        }
+
+        // SAFETY: we have already checked that the enum has this value!
+        let color_order: ColorOrder = unsafe { transmute(color_order_v) };
+
+        let _unknown = [u1, u2];
+
+        Ok(StatusResp {
+            power,
+            mode,
+            speed,
+            brightness,
+            pixel_type,
+            color_order,
+            _unknown,
+        })
+    }
+}
+
 impl Command {
-    fn discriminant(&self) -> u8 {
+    pub fn discriminant(&self) -> u8 {
         // SAFETY: Because `Self` is marked `repr(u8)`, its layout is a `repr(C)` `union`
         // between `repr(C)` structs, each of which has the `u8` discriminant as its first
         // field, so we can read the discriminant without offsetting the pointer.
@@ -168,9 +266,9 @@ mod tests {
 
     #[test]
     fn static_cmd() {
-        assert_eq!(Command::Power.buf(), [COMMAND_PREFIX, 0, 0, 0, 0xAA]);
-        assert_eq!(Command::FixedRed.buf(), [COMMAND_PREFIX, 0, 0, 0, 0x36]);
-        assert_eq!(Command::SpeedUp.buf(), [COMMAND_PREFIX, 0, 0, 0, 0x03]);
+        assert_eq!(*Command::Power.buf(), [COMMAND_PREFIX, 0, 0, 0, 0xAA]);
+        assert_eq!(*Command::FixedRed.buf(), [COMMAND_PREFIX, 0, 0, 0, 0x36]);
+        assert_eq!(*Command::SpeedUp.buf(), [COMMAND_PREFIX, 0, 0, 0, 0x03]);
     }
 
     #[test]
@@ -178,7 +276,7 @@ mod tests {
         let rgb = [0x12, 0x34, 0x56];
         let result = Command::Color(rgb.clone()).buf();
 
-        assert_eq!(result, [COMMAND_PREFIX, rgb[0], rgb[1], rgb[2], 0x1E]);
+        assert_eq!(*result, [COMMAND_PREFIX, rgb[0], rgb[1], rgb[2], 0x1E]);
     }
 
     #[test]
@@ -190,7 +288,7 @@ mod tests {
 
         let result = Command::SetPixels(leds).buf();
 
-        assert_eq!(result, [COMMAND_PREFIX, leds_hi, leds_lo, 0, 0x2D]);
+        assert_eq!(*result, [COMMAND_PREFIX, leds_hi, leds_lo, 0, 0x2D]);
     }
 
     #[test]
@@ -202,6 +300,6 @@ mod tests {
 
         let result = Command::SetColorOrder(order).buf();
 
-        assert_eq!(result, [COMMAND_PREFIX, ordinal, 0, 0, 0x3C]);
+        assert_eq!(*result, [COMMAND_PREFIX, ordinal, 0, 0, 0x3C]);
     }
 }

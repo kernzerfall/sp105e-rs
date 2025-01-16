@@ -675,6 +675,7 @@ dependencies = [
  "bluer",
  "clap",
  "futures-core",
+ "futures-util",
  "tokio",
 ]
 

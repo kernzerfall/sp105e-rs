@@ -2,8 +2,11 @@ use std::str::FromStr;
 
 use anyhow::{anyhow, Result};
 use bluer::{gatt::remote::Characteristic, Address, Device, Session, Uuid};
+use futures_util::{pin_mut, StreamExt};
 
-use crate::commands::{Command, GATT_CHARACTERISTIC_UUID, GATT_SERVICE_UUID};
+use crate::commands::{
+    Command, StatusResp, GATT_CHARACTERISTIC_UUID, GATT_SERVICE_UUID, STATUS_RETURN_LENGTH,
+};
 
 pub struct LEDClient {
     device: Device,
@@ -105,6 +108,23 @@ impl LEDClient {
         self.characteristic.write(&*command.buf()).await?;
 
         Ok(ind)
+    }
+
+    pub async fn get_status(&self) -> Result<StatusResp> {
+        let ret = self.send_cmd_with_callback(&Command::Status).await?;
+        let mut res: Vec<u8> = Vec::new();
+        pin_mut!(ret);
+        while res.len() < STATUS_RETURN_LENGTH as usize {
+            match ret.next().await {
+                Some(value) => res.extend(value),
+                None => {
+                    println!("notification session terminated prematurely");
+                    break;
+                }
+            }
+        }
+
+        res.try_into()
     }
 }
 
