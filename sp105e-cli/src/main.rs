@@ -50,6 +50,7 @@ pub async fn main() -> Result<()> {
 
     let command = match cli.verb {
         CliCommand::Power => Command::Power,
+        CliCommand::SetNumber { num } => Command::SetPixels(num),
         CliCommand::SetPixel { pixel } => Command::SetPixelType(pixel),
         CliCommand::SetOrder { order } => Command::SetColorOrder(order),
         CliCommand::SetColor { r, g, b } => Command::Color([r, g, b]),
