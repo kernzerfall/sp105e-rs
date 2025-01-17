@@ -38,9 +38,16 @@ async fn pretty_print_status(status: &StatusResp) -> Result<()> {
 
 #[tokio::main]
 pub async fn main() -> Result<()> {
+    if std::env::var("RUST_LOG").is_err() {
+        std::env::set_var("RUST_LOG", "info");
+    }
+
+    pretty_env_logger::init();
+
     let cli = args::Cli::parse();
 
     let client = LEDClient::new(cli.adapter, cli.target).await?;
+
     let command = match cli.verb {
         CliCommand::Power => Command::Power,
         CliCommand::SetPixel { pixel } => Command::SetPixelType(pixel),
