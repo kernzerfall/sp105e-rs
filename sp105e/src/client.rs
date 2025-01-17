@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use log::{debug, info, warn};
+
 use anyhow::{anyhow, Result};
 use bluer::{gatt::remote::Characteristic, Address, Device, Session, Uuid};
 use futures_util::{pin_mut, StreamExt};
@@ -24,7 +26,7 @@ impl LEDClient {
                 continue;
             }
 
-            println!("Found wanted service UUID");
+            info!("Found wanted service UUID.");
 
             for chr in service.characteristics().await? {
                 let uuid = chr.uuid().await?;
@@ -32,9 +34,9 @@ impl LEDClient {
                     continue;
                 }
 
-                println!("Found wanted characteristic UUID");
+                info!("Found wanted characteristic UUID.");
 
-                println!("{:#?}", chr.all_properties().await?);
+                debug!("{:#?}", chr.all_properties().await?);
 
                 return Ok(chr);
             }
@@ -47,7 +49,7 @@ impl LEDClient {
         if !device.is_connected().await? {
             let mut retry = 3;
             loop {
-                println!("Trying to connect\n");
+                info!("Trying to connect\n");
                 if device.connect().await.is_ok() {
                     break;
                 }
@@ -79,8 +81,9 @@ impl LEDClient {
         let device = adapter.device(Address::from_str(&target_mac)?)?;
         if !device.is_connected().await? {
             Self::ensure_device_connected(&device).await?;
+            info!("Connected!");
         } else {
-            println!("Already connected!");
+            info!("Already connected!");
         }
 
         let characteristic = Self::find_led_characteristic(&device).await?;
@@ -118,7 +121,7 @@ impl LEDClient {
             match ret.next().await {
                 Some(value) => res.extend(value),
                 None => {
-                    println!("notification session terminated prematurely");
+                    warn!("notification session terminated prematurely");
                     break;
                 }
             }
