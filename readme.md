@@ -18,7 +18,8 @@
 The library can be found under `sp105e`.
 
 - [src/commands.rs](sp105e/src/commands.rs)
-  contains the command definitions and buffer building logic.
+  contains the command definitions and buffer building logic,
+  as well as the (partial) decoder for the status message.
 - [src/client.rs](sp105e/src/client.rs)
   contains a simple BLE abstraction layer using BlueR (BlueZ).
   Obviously supported only on Linux. Feature: `client`.
