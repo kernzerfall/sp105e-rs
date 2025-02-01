@@ -39,8 +39,12 @@ pub(super) enum FixedColor {
 pub(super) struct Cli {
     #[command(subcommand)]
     pub verb: CliCommand,
-    #[arg(short, long)]
+
+    /// MAC of the Bluetooth adapter to use on the Host.
+    #[arg(short, long, value_name = "01:23:45:67:89:ab")]
     pub adapter: Option<String>,
-    #[arg(short, long)]
+
+    /// MAC of the target SP105E device.
+    #[arg(short, long, value_name = "01:23:45:67:89:ab")]
     pub target: String,
 }
